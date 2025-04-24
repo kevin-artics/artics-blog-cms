@@ -8,6 +8,7 @@ import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
+import { Category, Post, User } from '@/payload-types'
 
 export const revalidate = 600
 
@@ -51,7 +52,7 @@ export default async function Page({ params: paramsPromise }: Args) {
         />
       </div>
 
-      <CollectionArchive posts={posts.docs} />
+      <CollectionArchive docs={posts.docs as (Post | Category | User)[]} />
 
       <div className="container">
         {posts?.page && posts?.totalPages > 1 && (
@@ -65,7 +66,7 @@ export default async function Page({ params: paramsPromise }: Args) {
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { pageNumber } = await paramsPromise
   return {
-    title: `Payload Website Template Posts Page ${pageNumber || ''}`,
+    title: `ArtICS Lab Posts Page ${pageNumber || ''}`,
   }
 }
 

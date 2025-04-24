@@ -353,6 +353,23 @@ export interface Media {
 export interface Category {
   id: number;
   title: string;
+  image?: (number | null) | Media;
+  description?: string | null;
+  about?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   slug?: string | null;
   slugLock?: boolean | null;
   parent?: (number | null) | Category;
@@ -373,7 +390,27 @@ export interface Category {
  */
 export interface User {
   id: number;
-  name?: string | null;
+  name: string;
+  position?: string | null;
+  avatar?: (number | null) | Media;
+  description?: string | null;
+  about?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -514,7 +551,7 @@ export interface ArchiveBlock {
     [k: string]: unknown;
   } | null;
   populateBy?: ('collection' | 'selection') | null;
-  relationTo?: 'posts' | null;
+  relationTo?: ('posts' | 'categories' | 'users') | null;
   categories?: (number | Category)[] | null;
   limit?: number | null;
   selectedDocs?:
@@ -1246,6 +1283,9 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
+  image?: T;
+  description?: T;
+  about?: T;
   slug?: T;
   slugLock?: T;
   parent?: T;
@@ -1266,6 +1306,12 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  position?: T;
+  avatar?: T;
+  description?: T;
+  about?: T;
+  slug?: T;
+  slugLock?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

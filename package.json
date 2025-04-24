@@ -1,7 +1,8 @@
 {
-  "name": "payload-vercel-website-template",
+  "name": "artics-blog-cms",
   "version": "1.0.0",
-  "description": "Website template for Payload",
+  "description": "A CMS for ArtICS Lab built with Next.js and PayloadCMS",
+  "author": "gsmkev",
   "license": "MIT",
   "type": "module",
   "scripts": {

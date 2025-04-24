@@ -6,7 +6,7 @@ import { getPayload } from 'payload'
 import React from 'react'
 import { Search } from '@/search/Component'
 import PageClient from './page.client'
-import { CardPostData } from '@/components/Card'
+import { Category, Post, User } from '@/payload-types'
 
 type Args = {
   searchParams: Promise<{
@@ -73,7 +73,7 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
       </div>
 
       {posts.totalDocs > 0 ? (
-        <CollectionArchive posts={posts.docs as CardPostData[]} />
+        <CollectionArchive docs={posts.docs as (Post | Category | User)[]} />
       ) : (
         <div className="container">No results found.</div>
       )}
@@ -83,6 +83,6 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
 
 export function generateMetadata(): Metadata {
   return {
-    title: `Payload Website Template Search`,
+    title: `ArtICS Lab Search`,
   }
 }

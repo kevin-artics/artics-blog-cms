@@ -7,6 +7,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
+import { Category, Post, User } from '@/payload-types'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
@@ -45,7 +46,7 @@ export default async function Page() {
         />
       </div>
 
-      <CollectionArchive posts={posts.docs} />
+      <CollectionArchive docs={posts.docs as (Post | Category | User)[]} />
 
       <div className="container">
         {posts.totalPages > 1 && posts.page && (
@@ -58,6 +59,6 @@ export default async function Page() {
 
 export function generateMetadata(): Metadata {
   return {
-    title: `Payload Website Template Posts`,
+    title: `ArtICS Lab Posts`,
   }
 }
