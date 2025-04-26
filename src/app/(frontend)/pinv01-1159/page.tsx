@@ -1,16 +1,37 @@
 'use client'
 
-import { useState, ChangeEvent } from 'react'
+import { useState, ChangeEvent, useEffect } from 'react'
 import Image from 'next/image'
 import { cn } from '@/utilities/ui'
+import dynamic from 'next/dynamic'
+import { MapPin, Droplet, Thermometer, Settings } from 'lucide-react'
+import { LeafletMouseEvent } from 'leaflet'
+import { useMapEvents } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
+
+const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), {
+  ssr: false,
+})
+const TileLayer = dynamic(() => import('react-leaflet').then((mod) => mod.TileLayer), {
+  ssr: false,
+})
+const Marker = dynamic(() => import('react-leaflet').then((mod) => mod.Marker), { ssr: false })
 
 export default function PInv011159Page() {
   const [originalImage, setOriginalImage] = useState<string | null>(null)
   const [base64Image, setBase64Image] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [showImages, setShowImages] = useState<boolean>(false)
+  const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null)
   const [isDragging, setIsDragging] = useState<boolean>(false)
   const [, setDragCounter] = useState<number>(0)
+
+  const [waterQuality, setWaterQuality] = useState({
+    turbidity: '',
+    ph: '',
+    temperature: '',
+    notes: '',
+  })
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -64,6 +85,62 @@ export default function PInv011159Page() {
     }
   }
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setWaterQuality((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleRegister = () => {
+    const result = {
+      originalImage: base64Image,
+      processedImage: base64Image,
+      coordinates,
+      waterQuality,
+    }
+
+    console.log('Registro:', result)
+  }
+
+  function LocationMarker({
+    coordinates,
+    setCoordinates,
+  }: {
+    coordinates: { lat: number; lng: number } | null
+    setCoordinates: (coords: { lat: number; lng: number } | null) => void
+  }) {
+    const [icon, setIcon] = useState<L.Icon | null>(null)
+
+    useEffect(() => {
+      async function loadIcon() {
+        const L = (await import('leaflet')).default
+
+        const newIcon = L.icon({
+          iconUrl: '/marker-icon.png',
+          iconSize: [32, 32],
+          iconAnchor: [16, 32],
+          popupAnchor: [0, -32],
+        })
+
+        setIcon(newIcon)
+      }
+
+      loadIcon()
+    }, [])
+
+    useMapEvents({
+      click: (e: LeafletMouseEvent) => {
+        setCoordinates({
+          lat: e.latlng.lat,
+          lng: e.latlng.lng,
+        })
+      },
+    })
+
+    if (!coordinates || !icon) return null
+
+    return <Marker position={[coordinates.lat, coordinates.lng]} icon={icon} />
+  }
+
   return (
     <div className="pt-24 pb-24">
       <div className="container">
@@ -107,25 +184,108 @@ export default function PInv011159Page() {
           </div>
         )}
 
-        {/* Images */}
+        {/* Images and Form */}
         {!loading && originalImage && base64Image && (
           <div
             className={cn(
-              'grid grid-cols-1 md:grid-cols-2 gap-16 mt-20 transition-opacity duration-700 ease-in-out',
+              'flex flex-col gap-20 mt-20 transition-opacity duration-700 ease-in-out',
               showImages ? 'opacity-100' : 'opacity-0',
             )}
           >
-            <div className="flex flex-col items-center text-center gap-6">
-              <h2 className="text-xl font-bold">Imagen Original</h2>
-              <div className="relative w-full aspect-square rounded-md overflow-hidden border border-border bg-background">
-                <Image src={originalImage} alt="Imagen original" fill className="object-cover" />
+            {/* Images */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+              <div className="flex flex-col items-center text-center gap-6">
+                <h2 className="text-xl font-bold">Imagen Original</h2>
+                <div className="relative w-full aspect-square rounded-md overflow-hidden border border-border bg-background">
+                  <Image src={originalImage} alt="Imagen original" fill className="object-cover" />
+                </div>
+              </div>
+              <div className="flex flex-col items-center text-center gap-6">
+                <h2 className="text-xl font-bold">Imagen Base64</h2>
+                <div className="relative w-full aspect-square rounded-md overflow-hidden border border-border bg-background">
+                  <Image src={base64Image} alt="Imagen base64" fill className="object-cover" />
+                </div>
               </div>
             </div>
-            <div className="flex flex-col items-center text-center gap-6">
-              <h2 className="text-xl font-bold">Imagen Procesada</h2>
-              <div className="relative w-full aspect-square rounded-md overflow-hidden border border-border bg-background">
-                <Image src={base64Image} alt="Imagen Procesada" fill className="object-cover" />
+
+            {/* Map */}
+            <div className="flex flex-col gap-4">
+              <h2 className="text-xl font-bold flex items-center gap-2">
+                <MapPin className="w-5 h-5" /> Seleccionar ubicación
+              </h2>
+              <div className="w-full h-80 rounded-md overflow-hidden border border-border">
+                <MapContainer
+                  center={[-23.4425, -58.4438]}
+                  zoom={5}
+                  scrollWheelZoom={true}
+                  className="w-full h-full"
+                >
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <LocationMarker coordinates={coordinates} setCoordinates={setCoordinates} />
+                </MapContainer>
               </div>
+            </div>
+
+            {/* Form */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <Droplet className="w-4 h-4" /> Turbidez (NTU)
+                </label>
+                <input
+                  type="number"
+                  name="turbidity"
+                  value={waterQuality.turbidity}
+                  onChange={handleInputChange}
+                  className="border rounded-md p-2 bg-background text-foreground"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <Settings className="w-4 h-4" /> pH
+                </label>
+                <input
+                  type="number"
+                  name="ph"
+                  value={waterQuality.ph}
+                  onChange={handleInputChange}
+                  className="border rounded-md p-2 bg-background text-foreground"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <Thermometer className="w-4 h-4" /> Temperatura (°C)
+                </label>
+                <input
+                  type="number"
+                  name="temperature"
+                  value={waterQuality.temperature}
+                  onChange={handleInputChange}
+                  className="border rounded-md p-2 bg-background text-foreground"
+                />
+              </div>
+              <div className="flex flex-col gap-2 md:col-span-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <Settings className="w-4 h-4" /> Notas adicionales
+                </label>
+                <textarea
+                  name="notes"
+                  value={waterQuality.notes}
+                  onChange={handleInputChange}
+                  rows={3}
+                  className="border rounded-md p-2 bg-background text-foreground resize-none"
+                />
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={handleRegister}
+                className="px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition"
+              >
+                Registrar Resultados
+              </button>
             </div>
           </div>
         )}
