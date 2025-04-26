@@ -8,7 +8,7 @@ export const revalidateCategory: CollectionAfterChangeHook<Category> = async ({
   req: { payload, context },
 }) => {
   if (!context?.disableRevalidate) {
-    const pathsToRevalidate = [`/categories`, `/categories/${doc.slug}`]
+    const pathsToRevalidate = [`/categories`, `/categories/${doc.slug}`, `/`]
 
     for (const path of pathsToRevalidate) {
       payload.logger.info(`Revalidating category at path: ${path}`)
@@ -26,7 +26,7 @@ export const revalidateCategoryDelete: CollectionAfterDeleteHook<Category> = asy
   req: { payload, context },
 }) => {
   if (!context?.disableRevalidate) {
-    const pathsToRevalidate = [`/categories`, `/categories/${doc.slug}`]
+    const pathsToRevalidate = [`/categories`, `/categories/${doc.slug}`, `/`]
 
     for (const path of pathsToRevalidate) {
       payload.logger.info(`Revalidating deleted category at path: ${path}`)

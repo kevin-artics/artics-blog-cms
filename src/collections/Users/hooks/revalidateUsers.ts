@@ -7,7 +7,7 @@ export const revalidateUser: CollectionAfterChangeHook<User> = async ({
   req: { payload, context },
 }) => {
   if (!context?.disableRevalidate) {
-    const pathsToRevalidate = [`/users`, `/users/${doc.slug}`]
+    const pathsToRevalidate = [`/users`, `/users/${doc.slug}`, `/`]
 
     for (const path of pathsToRevalidate) {
       payload.logger.info(`Revalidating user at path: ${path}`)
@@ -25,7 +25,7 @@ export const revalidateUserDelete: CollectionAfterDeleteHook<User> = async ({
   req: { payload, context },
 }) => {
   if (!context?.disableRevalidate) {
-    const pathsToRevalidate = [`/users`, `/users/${doc.slug}`]
+    const pathsToRevalidate = [`/users`, `/users/${doc.slug}`, `/`]
 
     for (const path of pathsToRevalidate) {
       payload.logger.info(`Revalidating deleted user at path: ${path}`)
