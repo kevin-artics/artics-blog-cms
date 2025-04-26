@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
+import { anyone } from '../../access/anyone'
+import { authenticated } from '../../access/authenticated'
 import { slugField } from '@/fields/slug'
 import {
   BlocksFeature,
@@ -11,9 +11,10 @@ import {
   InlineToolbarFeature,
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
-import { Banner } from '../blocks/Banner/config'
-import { Code } from '../blocks/Code/config'
-import { MediaBlock } from '../blocks/MediaBlock/config'
+import { Banner } from '../../blocks/Banner/config'
+import { Code } from '../../blocks/Code/config'
+import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { revalidateCategory, revalidateCategoryDelete } from './Hooks/revalidateCategory'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
@@ -60,4 +61,8 @@ export const Categories: CollectionConfig = {
     },
     ...slugField(),
   ],
+  hooks: {
+    afterChange: [revalidateCategory],
+    afterDelete: [revalidateCategoryDelete],
+  },
 }

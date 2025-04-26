@@ -13,6 +13,7 @@ import {
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { revalidateUser, revalidateUserDelete } from './hooks/revalidateUsers'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -68,4 +69,8 @@ export const Users: CollectionConfig = {
     ...slugField(),
   ],
   timestamps: true,
+  hooks: {
+    afterChange: [revalidateUser],
+    afterDelete: [revalidateUserDelete],
+  },
 }
