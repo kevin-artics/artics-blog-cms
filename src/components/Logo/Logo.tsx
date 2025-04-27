@@ -29,7 +29,7 @@ export const Logo = (props: Props) => {
         'xl:h-[100px]',
         className,
       )}
-      src={`${NEXT_PUBLIC_VERCEL_BLOB_BASE_URL}/logo.png`}
+      src={`${process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL}/logo.png`}
     />
   )
 }
