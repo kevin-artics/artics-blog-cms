@@ -26,7 +26,7 @@ export const Logo = (props: Props) => {
         'sm:h-[50px]',
         'md:h-[60px]',
         'lg:h-[80px]',
-        'xl:h-[100px]',
+        'xl:h-[80px]',
         className,
       )}
       src={`${process.env.NEXT_PUBLIC_VERCEL_BLOB_BASE_URL}/logo.png`}
