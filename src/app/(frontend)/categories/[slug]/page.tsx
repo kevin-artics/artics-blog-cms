@@ -51,13 +51,10 @@ export default async function CategoryPage(args: Args) {
       <section className="w-full flex justify-center mt-12">
         <div className="relative w-full max-w-4xl h-[300px] md:h-[400px] lg:h-[500px] rounded-xl overflow-hidden">
           {category.image && typeof category.image === 'object' && (
-            <>
-              <Media
-                resource={category.image}
-                className="absolute inset-0 object-cover w-full h-full"
-              />
+            <div className="flex items-center justify-center h-full relative">
+              <Media resource={category.image} className="object-cover w-auto h-full" />
               <div className="absolute inset-0 bg-black/40" />
-            </>
+            </div>
           )}
         </div>
       </section>
