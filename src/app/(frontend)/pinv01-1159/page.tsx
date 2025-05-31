@@ -4,10 +4,21 @@ import { useState, ChangeEvent, useEffect } from 'react'
 import Image from 'next/image'
 import { cn } from '@/utilities/ui'
 import dynamic from 'next/dynamic'
-import { MapPin, Droplet, Thermometer, Settings } from 'lucide-react'
+import {
+  MapPin,
+  Droplet,
+  Thermometer,
+  Settings,
+  ListOrdered,
+  Gauge,
+  Eye,
+  Bug,
+  Clock,
+} from 'lucide-react'
 import { LeafletMouseEvent } from 'leaflet'
 import { useMapEvents } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
+import axios from 'axios'
 
 const MapContainer = dynamic(() => import('react-leaflet').then((mod) => mod.MapContainer), {
   ssr: false,
@@ -25,6 +36,19 @@ export default function PInv011159Page() {
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null)
   const [isDragging, setIsDragging] = useState<boolean>(false)
   const [, setDragCounter] = useState<number>(0)
+  const [roboflowResult, setRoboflowResult] = useState<{
+    image: { width: number; height: number }
+    predictions: {
+      x: number
+      y: number
+      width: number
+      height: number
+      class: string
+      confidence: number
+      detection_id: string
+      time: number
+    }[]
+  } | null>(null)
 
   const [waterQuality, setWaterQuality] = useState({
     turbidity: '',
@@ -74,12 +98,42 @@ export default function PInv011159Page() {
   const processImage = async (file: File) => {
     setLoading(true)
     setShowImages(false)
+
     const reader = new FileReader()
     reader.readAsDataURL(file)
-    reader.onloadend = () => {
+
+    reader.onloadend = async () => {
       const base64String = reader.result as string
+
       setOriginalImage(URL.createObjectURL(file))
       setBase64Image(base64String)
+
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+
+        const response = await axios({
+          method: 'POST',
+          url: 'https://detect.roboflow.com/macroinvertebrados-acuaticos/1',
+          params: {
+            api_key: '2RLyVNicgMaHTfkWIqNl',
+          },
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+
+        console.log('Roboflow result:', response.data)
+        setRoboflowResult({
+          image: response.data.image,
+          predictions: response.data.predictions,
+        })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        console.error('Error al llamar a Roboflow:', error.message)
+      }
+
       setLoading(false)
       setTimeout(() => setShowImages(true), 100)
     }
@@ -139,6 +193,22 @@ export default function PInv011159Page() {
     if (!coordinates || !icon) return null
 
     return <Marker position={[coordinates.lat, coordinates.lng]} icon={icon} />
+  }
+
+  const predictionSummary: Record<string, { count: number; confidence: number[] }> = {}
+
+  if (roboflowResult?.predictions) {
+    for (const pred of roboflowResult.predictions) {
+      const label = pred.class
+
+      if (!predictionSummary[label]) {
+        predictionSummary[label] = { count: 0, confidence: [] }
+      }
+
+      const entry = predictionSummary[label]
+      entry.count += 1
+      entry.confidence.push(pred.confidence)
+    }
   }
 
   return (
@@ -201,12 +271,76 @@ export default function PInv011159Page() {
                 </div>
               </div>
               <div className="flex flex-col items-center text-center gap-6">
-                <h2 className="text-xl font-bold">Imagen Base64</h2>
+                <h2 className="text-xl font-bold">Predicción</h2>
                 <div className="relative w-full aspect-square rounded-md overflow-hidden border border-border bg-background">
                   <Image src={base64Image} alt="Imagen base64" fill className="object-cover" />
+
+                  {roboflowResult?.predictions.map((box, i) => {
+                    const scaleX = 100 / roboflowResult.image.width
+                    const scaleY = 100 / roboflowResult.image.height
+
+                    const left = (box.x - box.width / 2) * scaleX
+                    const top = (box.y - box.height / 2) * scaleY
+                    const width = box.width * scaleX
+                    const height = box.height * scaleY
+
+                    return (
+                      <div
+                        key={box.detection_id}
+                        className="absolute border-2 border-red-500 bg-red-500/10 text-xs text-red-800 font-semibold pointer-events-none"
+                        style={{
+                          left: `${left}%`,
+                          top: `${top}%`,
+                          width: `${width}%`,
+                          height: `${height}%`,
+                        }}
+                      >
+                        <div className="bg-red-500 text-white px-1 absolute top-0 left-0">
+                          {box.class} ({(box.confidence * 100).toFixed(1)}%)
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             </div>
+            {roboflowResult && (
+              <div className="mt-10 flex flex-col gap-6">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <ListOrdered className="w-5 h-5" /> Resumen de Detecciones
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {Object.entries(predictionSummary).map(([label, data]) => {
+                    const averageConfidence =
+                      data.confidence.reduce((sum, c) => sum + c, 0) / data.confidence.length
+
+                    return (
+                      <div
+                        key={label}
+                        className="border border-border rounded-md p-4 bg-muted/20 flex flex-col gap-2"
+                      >
+                        <div className="flex items-center gap-2 text-base font-semibold">
+                          <Bug className="w-4 h-4 text-primary" />
+                          <span>{label}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Eye className="w-4 h-4" />
+                          <span>Cantidad: {data.count}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Gauge className="w-4 h-4" />
+                          <span>Confianza Promedio: {(averageConfidence * 100).toFixed(1)}%</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Clock className="w-4 h-4" />
+                          <span>Tiempo de ejecución: {(averageConfidence * 100).toFixed(1)}%</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Map */}
             <div className="flex flex-col gap-4">
