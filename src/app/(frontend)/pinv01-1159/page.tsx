@@ -38,6 +38,7 @@ export default function PInv011159Page() {
   const [, setDragCounter] = useState<number>(0)
   const [roboflowResult, setRoboflowResult] = useState<{
     image: { width: number; height: number }
+    time: number
     predictions: {
       x: number
       y: number
@@ -46,7 +47,6 @@ export default function PInv011159Page() {
       class: string
       confidence: number
       detection_id: string
-      time: number
     }[]
   } | null>(null)
 
@@ -128,6 +128,7 @@ export default function PInv011159Page() {
         setRoboflowResult({
           image: response.data.image,
           predictions: response.data.predictions,
+          time: response.data.time,
         })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
@@ -333,7 +334,9 @@ export default function PInv011159Page() {
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Clock className="w-4 h-4" />
-                          <span>Tiempo de ejecución: {(averageConfidence * 100).toFixed(1)}%</span>
+                          <span>
+                            Tiempo de inferencia: {roboflowResult.time.toFixed(2)} segundos
+                          </span>
                         </div>
                       </div>
                     )
