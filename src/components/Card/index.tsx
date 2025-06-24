@@ -44,7 +44,7 @@ export const Card: React.FC<{
 
   const description =
     (isPost(doc) && doc.meta?.description) ||
-    (isUser(doc) && doc.description) ||
+    (isUser(doc) && doc.position) ||
     (isCategory(doc) && doc.description) ||
     ''
 
@@ -142,8 +142,11 @@ export const Card: React.FC<{
               </div>
             )}
             {description && (
-              <div className="mt-2 flex-1">
-                <p>{sanitizedDescription}</p>
+              <div className="mt-3">
+                <p className="text-base text-muted-foreground">
+                  <span className="font-medium text-foreground">Position: </span>
+                  {sanitizedDescription}
+                </p>
               </div>
             )}
             {/* Tags pill for categories only */}
