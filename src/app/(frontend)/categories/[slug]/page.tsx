@@ -113,6 +113,41 @@ export default async function CategoryPage(args: Args) {
             />
           )}
 
+          {/* Researchers Section */}
+          {category.researchers && category.researchers.length > 0 && (
+            <div className="max-w-[48rem] mx-auto mb-12">
+              <h2 className="text-2xl font-semibold mb-6 text-center">Investigadores</h2>
+              <div className="flex flex-wrap justify-center gap-4">
+                {category.researchers.map((researcher) => {
+                  // Skip if it's just an ID (not populated)
+                  if (typeof researcher === 'number') return null
+
+                  return (
+                    <div key={researcher.id} className="flex flex-col items-center text-center">
+                      <div className="w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-gray-200">
+                        {researcher.avatar && typeof researcher.avatar !== 'number' ? (
+                          <Media
+                            resource={researcher.avatar}
+                            imgClassName="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                            <span className="text-gray-600 text-lg font-semibold">
+                              {researcher.name?.charAt(0) || researcher.email?.charAt(0) || '?'}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-sm font-medium">
+                        {researcher.name || researcher.email || 'Sin nombre'}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="container mb-8">
             <PageRange
               collection="posts"

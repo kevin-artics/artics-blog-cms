@@ -355,6 +355,10 @@ export interface Category {
   title: string;
   image?: (number | null) | Media;
   description?: string | null;
+  /**
+   * Selecciona los investigadores asociados a esta categoría (0 a N investigadores)
+   */
+  researchers?: (number | User)[] | null;
   about?: {
     root: {
       type: string;
@@ -1285,6 +1289,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
   image?: T;
   description?: T;
+  researchers?: T;
   about?: T;
   slug?: T;
   slugLock?: T;

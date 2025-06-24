@@ -44,6 +44,17 @@ export const Categories: CollectionConfig = {
       type: 'textarea',
     },
     {
+      name: 'researchers',
+      label: 'Investigadores',
+      type: 'relationship',
+      relationTo: 'users',
+      hasMany: true,
+      admin: {
+        description:
+          'Selecciona los investigadores asociados a esta categoría (0 a N investigadores)',
+      },
+    },
+    {
       name: 'about',
       type: 'richText',
       editor: lexicalEditor({
