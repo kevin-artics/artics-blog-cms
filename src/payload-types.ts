@@ -72,6 +72,7 @@ export interface Config {
     media: Media;
     categories: Category;
     users: User;
+    tags: Tag;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -88,6 +89,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    tags: TagsSelect<false> | TagsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -356,6 +358,10 @@ export interface Category {
   image?: (number | null) | Media;
   description?: string | null;
   /**
+   * Selecciona los tags asociados a esta categoría
+   */
+  tags?: (number | Tag)[] | null;
+  /**
    * Selecciona los investigadores asociados a esta categoría (0 a N investigadores)
    */
   researchers?: (number | User)[] | null;
@@ -385,6 +391,31 @@ export interface Category {
         id?: string | null;
       }[]
     | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Gestiona los tags que se pueden usar en las categorías
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags".
+ */
+export interface Tag {
+  id: number;
+  /**
+   * Nombre del tag (debe ser único)
+   */
+  name: string;
+  /**
+   * Descripción opcional del tag
+   */
+  description?: string | null;
+  /**
+   * Color del tag para personalización visual
+   */
+  color?: ('blue' | 'green' | 'red' | 'yellow' | 'purple' | 'orange' | 'gray') | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -961,6 +992,10 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'tags';
+        value: number | Tag;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: number | Redirect;
       } | null)
@@ -1289,6 +1324,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
   image?: T;
   description?: T;
+  tags?: T;
   researchers?: T;
   about?: T;
   slug?: T;
@@ -1326,6 +1362,19 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags_select".
+ */
+export interface TagsSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  color?: T;
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

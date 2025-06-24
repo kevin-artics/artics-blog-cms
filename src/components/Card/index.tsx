@@ -48,8 +48,11 @@ export const Card: React.FC<{
     (isCategory(doc) && doc.description) ||
     ''
 
+  const tags = isCategory(doc) ? doc.tags : undefined
+
   const sanitizedDescription = description?.replace(/\s/g, ' ')
   const hasCategories = Array.isArray(categories) && categories.length > 0
+  const hasTags = Array.isArray(tags) && tags.length > 0
   const href = `/${relationTo}/${slug || doc?.id}`
 
   return (
@@ -141,6 +144,27 @@ export const Card: React.FC<{
             {description && (
               <div className="mt-2 flex-1">
                 <p>{sanitizedDescription}</p>
+              </div>
+            )}
+            {/* Tags pill for categories only */}
+            {isCategory(doc) && hasTags && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <div className="flex flex-wrap gap-2">
+                  {tags?.map((tag, index) => {
+                    if (typeof tag === 'object' && 'name' in tag) {
+                      const tagName = tag.name || 'Untitled tag'
+                      return (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary-foreground border border-secondary/20"
+                        >
+                          {tagName}
+                        </span>
+                      )
+                    }
+                    return null
+                  })}
+                </div>
               </div>
             )}
             {/* Category pill for posts only */}

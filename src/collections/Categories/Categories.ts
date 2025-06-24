@@ -44,6 +44,16 @@ export const Categories: CollectionConfig = {
       type: 'textarea',
     },
     {
+      name: 'tags',
+      label: 'Tags',
+      type: 'relationship',
+      relationTo: 'tags',
+      hasMany: true,
+      admin: {
+        description: 'Selecciona los tags asociados a esta categoría',
+      },
+    },
+    {
       name: 'researchers',
       label: 'Investigadores',
       type: 'relationship',

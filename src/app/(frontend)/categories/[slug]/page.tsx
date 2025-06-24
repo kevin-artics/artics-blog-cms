@@ -93,6 +93,28 @@ export default async function CategoryPage(args: Args) {
                 <p>{category.description}</p>
               </div>
             )}
+
+            {category.tags && category.tags.length > 0 && (
+              <div className="flex flex-col gap-2 mt-4">
+                <p className="text-sm">Tags</p>
+                <div className="flex flex-wrap gap-2">
+                  {category.tags.map((tag, index) => {
+                    if (typeof tag === 'object' && 'name' in tag) {
+                      const tagName = tag.name || 'Untitled tag'
+                      return (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-secondary/10 text-secondary-foreground border border-secondary/20"
+                        >
+                          {tagName}
+                        </span>
+                      )
+                    }
+                    return null
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="min-h-[80vh] select-none">
