@@ -45,23 +45,29 @@ export default async function UserPage(args: Args) {
       <PageClient />
       <PayloadRedirects disableNotFound url={url} />
 
-      <section className="w-full flex justify-center mt-16">
-        <div className="w-full max-w-3xl px-6 flex flex-col items-center text-center">
-          {user.avatar && typeof user.avatar === 'object' && (
-            <div className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-full overflow-hidden mb-6 border border-border shadow-lg bg-background flex items-center justify-center">
-              <Media
-                resource={user.avatar}
-                className="absolute inset-0 w-full h-full object-cover object-center"
-              />
-            </div>
-          )}
+      <section className="w-full flex justify-center mt-20">
+        <div className="w-full max-w-2xl px-6">
+          {/* Profile Header */}
+          <div className="text-center mb-16">
+            {user.avatar && typeof user.avatar === 'object' && (
+              <div className="relative w-40 h-40 mx-auto mb-8 rounded-full overflow-hidden border border-border">
+                <Media
+                  resource={user.avatar}
+                  className="w-full h-full object-cover object-center"
+                />
+              </div>
+            )}
 
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-2">{user.name}</h1>
+            <h1 className="text-3xl font-semibold text-foreground mb-3">{user.name}</h1>
 
-          {user.position && <p className="text-sm text-muted-foreground mb-4">{user.position}</p>}
+            {user.position && (
+              <p className="text-base text-muted-foreground font-medium">{user.position}</p>
+            )}
+          </div>
 
+          {/* About Section */}
           {user.about && (
-            <div className="mt-6 max-w-prose w-full">
+            <div className="prose prose-neutral max-w-none">
               <RichText data={user.about} />
             </div>
           )}
