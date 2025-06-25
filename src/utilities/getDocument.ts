@@ -22,6 +22,22 @@ async function getDocument(collection: Collection, slug: string, depth = 0) {
   return page.docs[0]
 }
 
+export async function getMediaByFilename(filename: string, depth = 0) {
+  const payload = await getPayload({ config: configPromise })
+
+  const media = await payload.find({
+    collection: 'media',
+    depth,
+    where: {
+      filename: {
+        equals: filename,
+      },
+    },
+  })
+
+  return media.docs[0]
+}
+
 /**
  * Returns a unstable_cache function mapped with the cache tag for the slug
  */
